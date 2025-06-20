@@ -88,8 +88,8 @@ router.post('/', async (req, res) => {
     const ownerId = req.session.user.id;
 
     try {
-        // This is an important security check to make sure the dog being
-        // requested for a walk actually belongs to the logged-in owner.
+        // This is an important security check to make sure
+        // the dog being requested for a walk actually belongs to the logged-in owner.
         const [dogCheck] = await db.query('SELECT * FROM Dogs WHERE dog_id = ? AND owner_id = ?', [dog_id, ownerId]);
 
         if (dogCheck.length === 0) {
