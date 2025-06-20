@@ -13,7 +13,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// This is the main login route. It's called by the form on the frontend.
+// This is the main login route, called by the form on the frontend.
 router.post('/login', async (req, res) => {
   // Just getting the username from the request body.
   const { username } = req.body;
@@ -52,13 +52,13 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// This is the new route for logging out.
+// A simple route to handle logging out.
 router.get('/logout', (req, res) => {
     // To log a user out, we just destroy their session data on the server.
     req.session.destroy(err => {
-        // Basic error handling in case something goes wrong.
         if (err) {
-            return res.status(500).json({ error: 'Could not log out, please try again.' });
+            // If something goes wrong, send an error.
+            return res.status(500).json({ error: 'Could not log out, please try again.'});
         }
         // If logout is successful, send a confirmation message.
         // The frontend will use this to redirect to the home/login page.
@@ -77,5 +77,30 @@ router.get('/me', (req, res) => {
   // If they are logged in, send back their user info.
   res.json(req.session.user);
 });
+
+// I'm adding this new route to get a list of all dogs for the homepage.
+// It's a public route, so no session check is needed.
+router.get('/dogs', async (req, res) => {
+    try {
+        // This query joins the Dogs and Users tables to get the dog's name,
+        // size, and the owner's username.
+        const [dogs] = await db.query(`
+            SELECT
+                d.name AS dog_name,
+                d.size,
+                u.username AS owner_username
+            FROM Dogs d
+            JOIN Users u ON d.owner_id = u.user_id
+            ORDER BY d.name ASC
+        `);
+        // Send the list of dogs back as JSON.
+        res.json(dogs);
+    } catch (error) {
+        // Basic error handling if the query fails.
+        console.error('Failed to fetch all dogs:', error);
+        res.status(500).json({ error: 'Failed to retrieve dog list.' });
+    }
+});
+
 
 module.exports = router;
