@@ -1,3 +1,9 @@
+-- This clears the tables in the correct order to avoid foreign key errors.
+-- It makes the script safe to run multiple times.
+DELETE FROM WalkRequests;
+DELETE FROM Dogs;
+DELETE FROM Users;
+
 -- Step 1: Insert Users
 INSERT INTO Users (username, email, password_hash, role) VALUES
 ('ownerJane', 'jane@example.com', 'hashedpassword123', 'owner'),
