@@ -9,13 +9,17 @@
 </head>
 <body class="bg-light">
   <div id="app" class="container py-4">
-    <h1 class="mb-4 text-success">Walker Dashboard</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1 class="text-success">Walker Dashboard (Welcome, {{ user.username }})</h1>
+      <button @click="logout" class="btn btn-outline-secondary">Log Out</button>
+    </div>
 
-    <!-- Alert messages -->
+    <!-- Alert messages for success or error -->
     <div v-if="message" class="alert alert-info">{{ message }}</div>
     <div v-if="error" class="alert alert-danger">{{ error }}</div>
 
-    <!-- Walk requests list -->
+    <h2 class="mb-3">Available Walk Requests</h2>
+    <!-- List of available walk requests -->
     <div v-if="walks.length > 0" class="row">
       <div class="col-md-6 mb-4" v-for="walk in walks" :key="walk.request_id">
         <div class="card">
@@ -25,9 +29,9 @@
               <strong>Date:</strong> {{ new Date(walk.requested_time).toLocaleString() }}<br>
               <strong>Duration:</strong> {{ walk.duration_minutes }} minutes<br>
               <strong>Location:</strong> {{ walk.location }}<br>
-              <strong>Owner:</strong> {{ walk.owner_name }}
+              <strong>Owner:</strong> {{ walk.owner_username }}
             </p>
-            <button type=button class="btn btn-outline-success" @click="applyToWalk(walk.request_id)">Apply</button>
+            <button type="button" class="btn btn-outline-success" @click="applyToWalk(walk.request_id)">Apply</button>
           </div>
         </div>
       </div>
@@ -41,13 +45,35 @@
     createApp({
       setup() {
         const walks = ref([]);
+        const user = ref({ username: 'Guest' });
         const message = ref('');
         const error = ref('');
-        const user = 3;
 
+        // This function gets the currently logged-in user's info
+        async function fetchCurrentUser() {
+            try {
+                const res = await fetch('/api/users/me');
+                // If the user isn't logged in or isn't a walker, send them back to the login page.
+                if (!res.ok) {
+                  window.location.href = '/index.html';
+                  return;
+                }
+                const userData = await res.json();
+                if (userData.role !== 'walker') {
+                  window.location.href = '/index.html';
+                  return;
+                }
+                user.value = userData;
+            } catch (e) {
+                window.location.href = '/index.html';
+            }
+        }
+
+        // This function loads all walk requests that are currently 'open'
         async function loadWalkRequests() {
           try {
-            const res = await fetch('/api/walks');
+            // This API endpoint needs to be created on the backend to serve only open walks
+            const res = await fetch('/api/walks/open');
             if (!res.ok) throw new Error('Failed to load walk requests');
             walks.value = await res.json();
           } catch (err) {
@@ -55,39 +81,58 @@
           }
         }
 
+        // This function handles the "Apply" button click
         async function applyToWalk(requestId) {
+          error.value = '';
+          message.value = '';
           try {
+            // This API endpoint also needs to be created on the backend
             const res = await fetch(`/api/walks/${requestId}/apply`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ walker_id: user })
+              // No need to send body, the server knows who the walker is from the session.
             });
             const result = await res.json();
 
             if (!res.ok) throw new Error(result.error || 'Application failed');
+
             message.value = result.message;
-            error.value = '';
+            // After applying, reload the list to remove the one just applied for.
             await loadWalkRequests();
           } catch (err) {
             error.value = err.message;
-            message.value = '';
           }
         }
 
+        // The logout function
+        async function logout() {
+          try {
+              const res = await fetch('/api/users/logout');
+              if (res.ok) {
+                  window.location.href = '/index.html';
+              }
+          } catch (e) {
+              console.error('Logout failed', e);
+          }
+        }
+
+        // When the page first loads, get the user's info and the list of open walks
         onMounted(() => {
+          fetchCurrentUser();
           loadWalkRequests();
         });
 
+        // Make everything available to the HTML template
         return {
           walks,
+          user,
           message,
           error,
-          applyToWalk
+          applyToWalk,
+          logout
         };
       }
     }).mount('#app');
   </script>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
