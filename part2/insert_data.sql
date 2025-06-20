@@ -1,5 +1,7 @@
 -- This clears the tables in the correct order to avoid foreign key errors.
 -- It makes the script safe to run multiple times.
+DELETE FROM WalkRatings;
+DELETE FROM WalkApplications;
 DELETE FROM WalkRequests;
 DELETE FROM Dogs;
 DELETE FROM Users;
