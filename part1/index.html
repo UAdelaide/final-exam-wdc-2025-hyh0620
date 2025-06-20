@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dog of the Day - Top Dog Walking Service!</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        body {
+            background-color: #00008B;
+            color: #FFFF00;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            overflow-x: hidden;
+        }
+
+        #app {
+            position: relative;
+            width: 100%;
+            min-height: 100vh;
+            border: 5px dotted hotpink;
+        }
+
+        marquee {
+            font-size: 24px;
+            color: #FF00FF;
+            position: fixed;
+            top: 50%;
+            width: 100%;
+            z-index: 100;
+        }
+
+        .header-title {
+            font-size: 18px;
+            text-align: center;
+            color: #00FF00;
+        }
+
+        .dog-card {
+            padding: 15px;
+            margin: 20px auto;
+            width: 80%;
+            text-align: center;
+            background-image: url('https://placehold.co/100x100/CCCCCC/FFFFFF/png?text=BG');
+            border: 2px solid #FFFFFF;
+        }
+
+        .dog-image {
+            width: 300px;
+            height: 300px;
+            object-fit: cover;
+            border: 10px ridge #FFD700;
+        }
+
+        .dog-details p {
+            margin: 5px 0;
+            font-size: 22px;
+        }
+        .dog-details .label {
+            color: #ADFF2F;
+            font-weight: normal;
+        }
+        .dog-details .value {
+            color: #FFFFFF;
+            font-size: 14px;
+        }
+
+        .action-button {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 50px;
+            height: 20px;
+            background-color: #FFA500;
+            color: #000000;
+            border: 1px solid #000;
+            font-size: 8px;
+            text-align: center;
+            line-height: 20px;
+            cursor: pointer;
+        }
+        .action-button:focus {
+            outline: none;
+        }
+
+        .blinking-text {
+            animation: blinker 1s linear infinite;
+        }
+
+        @keyframes blinker {
+            50% {
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <marquee>!! 5% OFF FOR BOOKING NOW...PROMO CODE: DOGGO123...TODAY ONLY !!</marquee>
+
+        <div class="header-title">
+            <span class="blinking-text">Star of the Day</span>
+        </div>
+
+        <div class="dog-card">
+            <img :src="dogImage" class="dog-image">
+
+            <div class="dog-details">
+                <p>
+                    <span class="label">Execute Synergistic Canine Visualization Protocol</span>
+                </p>
+                <h2 style="font-size: 16px; color: cyan;">{{ dogDetails.name }}</h2>
+                <p><span class="label">Breed:</span> <span class="value">{{ dogDetails.breed }}</span></p>
+                <p><span class="label">Age:</span> <span class="value">{{ dogDetails.age }} years</span></p>
+                <p><span class="label">Hobbies:</span> <span class="value">{{ dogDetails.hobbies }}</span></p>
+            </div>
+        </div>
+
+        <div class="action-button" role="button" @click="requestWalk">
+            Request
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue
+
+        createApp({
+            data() {
+                return {
+                    dogImage: 'https://placehold.co/300x300/e8e8e8/000000?text=Loading...',
+                    dogDetails: {
+                        name: 'Sparky',
+                        breed: 'Unknown (it\'s too fast)',
+                        age: 3,
+                        hobbies: 'Chasing laser pointers, typing on keyboards'
+                    }
+                }
+            },
+            methods: {
+                requestWalk() {
+                    alert('Feature in development! Please try again tomorrow.');
+                }
+            },
+            mounted() {
+                fetch('https://dog.ceo/api/breeds/image/random')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            this.dogImage = data.message;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Failed to fetch dog image:', error);
+                        this.dogImage = 'https://placehold.co/300x300/ff0000/FFFFFF?text=Load+Failed';
+                    });
+            }
+        }).mount('#app');
+    </script>
+
+</body>
+</html>
