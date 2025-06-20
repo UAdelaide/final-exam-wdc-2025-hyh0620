@@ -72,7 +72,7 @@
         // This function loads all walk requests that are currently 'open'
         async function loadWalkRequests() {
           try {
-            // This API endpoint needs to be created on the backend to serve only open walks
+            // This API endpoint serves only open walks to the walker
             const res = await fetch('/api/walks/open');
             if (!res.ok) throw new Error('Failed to load walk requests');
             walks.value = await res.json();
@@ -86,18 +86,18 @@
           error.value = '';
           message.value = '';
           try {
-            // This API endpoint also needs to be created on the backend
+            // This API endpoint handles the application logic
             const res = await fetch(`/api/walks/${requestId}/apply`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              // No need to send body, the server knows who the walker is from the session.
+              // No need to send a body, the server knows who the walker is from the session.
             });
             const result = await res.json();
 
             if (!res.ok) throw new Error(result.error || 'Application failed');
 
             message.value = result.message;
-            // After applying, reload the list to remove the one just applied for.
+            // After applying, reload the list to show the updated set of open walks.
             await loadWalkRequests();
           } catch (err) {
             error.value = err.message;
