@@ -52,13 +52,13 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// A simple route to handle logging out.
+// This is the new route for logging out.
 router.get('/logout', (req, res) => {
     // To log a user out, we just destroy their session data on the server.
     req.session.destroy(err => {
+        // Basic error handling in case something goes wrong.
         if (err) {
-            // If something goes wrong, send an error.
-            return res.status(500).json({ error: 'Could not log out, please try again.'});
+            return res.status(500).json({ error: 'Could not log out, please try again.' });
         }
         // If logout is successful, send a confirmation message.
         // The frontend will use this to redirect to the home/login page.
